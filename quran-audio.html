@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Pak</title>
+    <link rel="icon" type="image/x-icon" href="images/quran1.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #16423C;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1{
+            color: #fff;
+        }
+        
+        h2 {
+            color: #347928;
+        }
+        .surah-container, .ayah-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .surah-card, .ayah-card {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            width: calc(100% - 40px);
+            max-width: 300px;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .surah-card:hover, .ayah-card:hover {
+            transform: translateY(-5px);
+        }
+        .ayah-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        .back-button {
+            background-color: #347928;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #104307;
+        }
+        .search-container {
+            margin: 10px;
+        }
+        .search-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            max-width: 300px;
+            box-sizing: border-box;
+        }
+        .play-all-button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .play-all-button:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 600px) {
+            .surah-card, .ayah-card {
+                width: calc(100% - 20px);
+                margin: 10px;
+            }
+            .search-input {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Quran Pak Surahs</h1>
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search Surah..." oninput="filterSurahs()">
+    </div>
+    <div class="surah-container" id="surah-container">Loading Surahs...</div>
+    <div class="ayah-container" id="ayah-container" style="display: none;"></div>
+    <button class="back-button" id="back-button" style="display: none;">Back to Surahs</button>
+
+    <script>
+        
+        let pray = alert(`Please Pray For My Father! \nاللّهُمّ اغفر لوالدي وارحمه كما ربّاني صغيراً \n"O Allah, forgive my father and have mercy on him as he raised me when I was small"`);
+
+        let currentAyahIndex = 0;
+        let audio = new Audio();
+        let surahs = []; // Store surah data for filtering
+
+        async function loadSurahs() {
+            const surahContainer = document.getElementById('surah-container');
+            try {
+                const response = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await response.json();
+                
+                if (data.data) {
+                    surahContainer.innerHTML = ''; // Clear the loading message
+                    surahs = data.data; // Store surah data
+
+                    data.data.forEach(surah => {
+                        const surahCard = document.createElement('div');
+                        surahCard.className = 'surah-card';
+                        
+                        // Add Surah details to the card
+                        surahCard.innerHTML = `
+                            <h2>${surah.number}. ${surah.englishName}</h2>
+                            <p><strong>Arabic Name:</strong> ${surah.name}</p>
+                            <p><strong>Translation:</strong> ${surah.englishNameTranslation}</p>
+                            <p><strong>Number of Ayahs:</strong> ${surah.numberOfAyahs}</p>
+                            <p><strong>Revelation Type:</strong> ${surah.revelationType}</p>
+                        `;
+                        
+                        // Make the card clickable
+                        surahCard.addEventListener('click', () => loadSurahDetails(surah.number));
+                        
+                        surahContainer.appendChild(surahCard);
+                    });
+                } else {
+                    surahContainer.innerHTML = '<p>Unable to load Surah details.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching Surah data:', error);
+                surahContainer.innerHTML = '<p>Error loading Surah details.</p>';
+            }
+        }
+
+        async function loadSurahDetails(surahNumber) {
+            const ayahContainer = document.getElementById('ayah-container');
+            const surahContainer = document.getElementById('surah-container');
+            const backButton = document.getElementById('back-button');
+            const searchContainer = document.querySelector('.search-container');
+
+            try {
+                // Fetch the Surah details in Arabic and its Urdu translation
+                const arabicResponse = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`);
+                const urduResponse = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ur.junagarhi`);
+                
+                const arabicData = await arabicResponse.json();
+                const urduData = await urduResponse.json();
+
+                if (arabicData.data && urduData.data) {
+                    ayahContainer.innerHTML = `
+                        <h2>${arabicData.data.englishName} - ${arabicData.data.name}</h2>
+                        <button class="play-all-button" data-surah-number="${surahNumber}">Play Audio</button>
+                    `;
+
+                    const playAllButton = ayahContainer.querySelector('.play-all-button');
+                    playAllButton.addEventListener('click', (event) => {
+                        event.stopPropagation(); // Prevent triggering the ayah card click event
+                        playAllSurah(arabicData.data.ayahs);
+                    });
+
+                    arabicData.data.ayahs.forEach((ayah, index) => {
+                        const urduAyah = urduData.data.ayahs[index];
+                        const ayahCard = document.createElement('div');
+                        ayahCard.className = 'ayah-card';
+
+                        ayahCard.innerHTML = `
+                            <p><strong>Ayah ${ayah.numberInSurah}:</strong></p>
+                            <p><strong>Arabic:</strong> ${ayah.text}</p>
+                            <p><strong>Urdu Translation:</strong> ${urduAyah.text}</p>
+                        `;
+                        
+                        ayahContainer.appendChild(ayahCard);
+                    });
+
+                    // Hide Surah list, show Ayah list, and remove search input
+                    surahContainer.style.display = 'none';
+                    ayahContainer.style.display = 'flex';
+                    backButton.style.display = 'inline-block';
+                    searchContainer.style.display = 'none'; // Hide search bar
+                } else {
+                    ayahContainer.innerHTML = '<p>Unable to load Surah details.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching Surah data:', error);
+                ayahContainer.innerHTML = '<p>Error loading Surah details.</p>';
+            }
+        }
+
+        function playAllSurah(ayahs) {
+            const audioUrls = ayahs.map(ayah => ayah.audio).filter(url => url);
+            let currentIndex = 0;
+
+            function playNext() {
+                if (currentIndex < audioUrls.length) {
+                    audio.src = audioUrls[currentIndex];
+                    audio.play();
+                    currentIndex++;
+                    audio.onended = playNext; // Play next audio when the current ends
+                }
+            }
+
+            playNext(); // Start playing the first Ayah
+        }
+
+        document.getElementById('back-button').addEventListener('click', () => {
+            // Show Surah list, hide Ayah list, and display search input
+            document.getElementById('surah-container').style.display = 'flex';
+            document.getElementById('ayah-container').style.display = 'none';
+            document.getElementById('back-button').style.display = 'none';
+            document.querySelector('.search-container').style.display = 'block'; // Show search bar
+            audio.pause(); // Stop any playing audio when navigating back
+        });
+
+        function filterSurahs() {
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            const filteredSurahs = surahs.filter(surah => 
+                surah.englishName.toLowerCase().includes(searchInput) ||
+                surah.name.toLowerCase().includes(searchInput)
+            );
+
+            const surahContainer = document.getElementById('surah-container');
+            surahContainer.innerHTML = '';
+
+            filteredSurahs.forEach(surah => {
+                const surahCard = document.createElement('div');
+                surahCard.className = 'surah-card';
+                
+                // Add Surah details to the card
+                surahCard.innerHTML = `
+                    <h2>${surah.number}. ${surah.englishName}</h2>
+                    <p><strong>Arabic Name:</strong> ${surah.name}</p>
+                    <p><strong>Translation:</strong> ${surah.englishNameTranslation}</p>
+                    <p><strong>Number of Ayahs:</strong> ${surah.numberOfAyahs}</p>
+                    <p><strong>Revelation Type:</strong> ${surah.revelationType}</p>
+                `;
+                
+                // Make the card clickable
+                surahCard.addEventListener('click', () => loadSurahDetails(surah.number));
+                
+                surahContainer.appendChild(surahCard);
+            });
+
+            if (filteredSurahs.length === 0) {
+                surahContainer.innerHTML = '<p>No Surahs found.</p>';
+            }
+        }
+
+        // Load the Surah list on page load
+        loadSurahs();
+    </script>
+</body>
+</html>

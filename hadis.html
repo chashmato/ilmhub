@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunan Abu Dawood Hadith Collection with Urdu Translation</title>
+    <link rel="icon" type="image/x-icon" href="images/quran1.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #007bff;
+        }
+        .hadith-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .hadith-card {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            width: 300px;
+            text-align: left;
+            transition: transform 0.2s;
+        }
+        .hadith-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <h1>Sunan Abu Dawood Hadith Collection with Urdu Translation</h1>
+    <div class="hadith-container" id="hadith-container">Loading Hadiths...</div>
+
+    <script>
+        async function loadHadiths() {
+            const hadithContainer = document.getElementById('hadith-container');
+            try {
+                // Fetch the Hadith data from the provided API URL
+                const response = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-abudawud.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Simulating the Urdu translation data
+                const urduTranslations = {
+                    1: "یہ ایک حدیث کی اردو ترجمہ ہے۔",
+                    2: "یہ دوسری حدیث کی اردو ترجمہ ہے۔",
+                    // Add more translations here for each hadith
+                };
+
+                // Check if data contains hadiths
+                if (data && data.hadiths) {
+                    hadithContainer.innerHTML = ''; // Clear loading message
+
+                    data.hadiths.forEach(hadith => {
+                        const hadithCard = document.createElement('div');
+                        hadithCard.className = 'hadith-card';
+
+                        // Get Urdu translation, if available
+                        const urduTranslation = urduTranslations[hadith.number] || "اردو ترجمہ دستیاب نہیں ہے۔";
+
+                        // Add hadith details to the card
+                        hadithCard.innerHTML = `
+                            <h2>Hadith #${hadith.number}</h2>
+                            <p><strong>Text:</strong> ${hadith.text}</p>
+                            <p><strong>Urdu Translation:</strong> ${urduTranslation}</p>
+                            <p><strong>Book:</strong> ${hadith.book}</p>
+                            <p><strong>Chapter:</strong> ${hadith.chapter}</p>
+                        `;
+
+                        hadithContainer.appendChild(hadithCard);
+                    });
+                } else {
+                    hadithContainer.innerHTML = '<p>No Hadiths found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching Hadiths:', error);
+                hadithContainer.innerHTML = `<p>Error loading Hadiths: ${error.message}</p>`;
+            }
+        }
+
+        // Load the Hadiths on page load
+        loadHadiths();
+    </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Page</title>
+    <link rel="icon" type="image/x-icon" href="images/quran1.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #16423C;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .plans {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .plan {
+            background-color: #e9e9e9;
+            padding: 20px;
+            border-radius: 10px;
+            width: 30%;
+            min-width: 250px;
+            margin: 10px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan:hover {
+            transform: translateY(-10px);
+            background-color: #d9d9d9;
+        }
+
+        .plan h2 {
+            margin: 0;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .plan::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 123, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .plan:hover::after {
+            opacity: 1;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #347928;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #1b5e0f;
+            transform: translateY(-2px);
+        }
+
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .payment-method-form {
+            display: none;
+            margin-top: 20px;
+            background-color: #f2f2f2;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #fff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .plans {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .plan {
+                width: 80%;
+                margin: 10px 0;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            button {
+                padding: 10px 20px;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 30% auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2em;
+            }
+
+            .plan {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px 15px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 40% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Plan</h1>
+        <div class="plans">
+            <div class="plan" id="free-plan">
+                <h2>Basic Plan</h2>
+                <p>Price: Free</p>
+                <p>Includes ads</p>
+                <ul class="feature-list">
+                    <li>Access to basic features</li>
+                </ul>
+                <button onclick="openModal('Basic', 0)">Select</button>
+            </div>
+            <div class="plan" id="monthly-plan">
+                <h2>Monthly Plan</h2>
+                <p>Price: 500 PKR/month</p>
+                <p>No ads</p>
+                <ul class="feature-list">
+                    <li>Access to all features</li>
+                </ul>
+                <button onclick="openModal('Monthly', 5000)">Select</button>
+            </div>
+            <div class="plan" id="yearly-plan">
+                <h2>Yearly Plan</h2>
+                <p>Price: 6000 PKR/year</p>
+                <p>Buy now and get 25% discount</p>
+                <ul class="feature-list">
+                    <li>Access to all features</li>
+                    <li>Exclusive Content</li>
+                    <li>Priority Support</li>
+                </ul>
+                <button onclick="openModal('Yearly', 60000, true)">Select</button>
+                <p id="discount-info" style="font-weight: bold; color: green;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Payment -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Payment Method</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <p id="selected-plan-modal"></p>
+            <label for="payment-method">Select Payment Method:</label>
+            <select id="payment-method" onchange="togglePaymentForm()">
+                <option value="easypaisa">Easypaisa</option>
+                <option value="bank">Bank Account</option>
+            </select>
+
+            <div id="easypaisa-form" class="payment-method-form">
+                <h3>Easypaisa Payment</h3>
+                <p>Please enter your Easypaisa number:</p>
+                <input type="text" placeholder="Easypaisa Number" required>
+                <button onclick="submitPayment('Easypaisa')">Pay via Easypaisa</button>
+            </div>
+
+            <div id="bank-form" class="payment-method-form">
+                <h3>Bank Payment</h3>
+                <p>Please enter your bank account details:</p>
+                <input type="text" placeholder="Account Number" required>
+                <button onclick="submitPayment('Bank Account')">Pay via Bank Account</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Subscription Service || Made With ❤️ || All rights reserved.</p>
+    </footer>
+    <script>
+        function openModal(plan, price, isYearly = false) {
+            document.getElementById('selected-plan-modal').innerText = `Selected Plan: ${plan}`;
+            if (isYearly) {
+                const discount = price * 0.25;
+                const discountedPrice = price - discount;
+                document.getElementById('discount-info').innerText = `Discounted Price: ${discountedPrice} PKR (25% off)`;
+            } else {
+                document.getElementById('discount-info').innerText = '';
+            }
+            document.getElementById('payment-modal').style.display = 'block';
+            togglePaymentForm(); // Show the default payment form
+        }
+
+        function closeModal() {
+            document.getElementById('payment-modal').style.display = 'none';
+        }
+
+        function togglePaymentForm() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const easypaisaForm = document.getElementById('easypaisa-form');
+            const bankForm = document.getElementById('bank-form');
+
+            if (paymentMethod === 'easypaisa') {
+                easypaisaForm.style.display = 'block';
+                bankForm.style.display = 'none';
+            } else {
+                easypaisaForm.style.display = 'none';
+                bankForm.style.display = 'block';
+            }
+        }
+
+        function submitPayment(method) {
+            const plan = document.getElementById('selected-plan-modal').innerText;
+            alert(`Payment for ${plan} will be processed through ${method}.`);
+            
+            // Simulate payment process
+            setTimeout(() => {
+                alert('Payment successful!');
+                window.location.href = 'index.html'; // Redirect to home screen
+            }, 1000);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('payment-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
